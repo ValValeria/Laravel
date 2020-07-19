@@ -15,7 +15,7 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected  $table='users';
+    protected  $table='users_laravel';
     protected $fillable = [
         'name', 'email', 'password',
     ];
@@ -27,9 +27,5 @@ class User extends Authenticatable
      */
     
 
-    public $timestamps = false;
-    
-    public function posts(){
-        return $this->hasMany('App\Post');
-    }
+   
 }

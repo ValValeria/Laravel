@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller as Controller;
 use App\User;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -11,21 +11,31 @@ use Illuminate\Support\Facades\Storage;
 class Data
 {
 
-     public function show(Request $request,string $filename)
+     public function show(Request $request,string $folder,string $filename)
      {
-        $path=`/public/${$folder}/${filename}`;
+        $path=$folder.'/'.$filename;
         return $this->exists($path);
      }
 
      public function exists(string $path)
-     {
-        if(Storage::disk('public')->exists($path)){
-            $content=Storage::get($path);
-            return response()->header([
-                'Content-Type'=>M::mime(pathinfo($path,PATHINFO_EXTENSION))
-            ]);
+     { 
+        try {
+            if(Storage::disk("public")->exists($path)){
+                $disk="public";
+            }else if(Storage::disk("build")->exists($path)) {
+                $disk="build";
+            }else {
+                return  response("",404);
+            }
+    
+            $content=Storage::disk($disk)->get($path);
+    
+            return response($content)->header(
+                    'Content-Type',M::mime(pathinfo($path,PATHINFO_EXTENSION))
+            );
+        } catch (\Throwable $th) {
+            echo $th->getMessage();
         }
-        return  response("",404);
      }
 }
 ?>

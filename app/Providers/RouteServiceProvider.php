@@ -75,14 +75,6 @@ class RouteServiceProvider extends ServiceProvider
 
     }
     public function boot(){
-      parent::boot();
-       
-      Route::bind('user',function($value){
-              return App\User::where('id',$value)->first();
-      });
-      Route::bind('post',function($value){
-        return Post::where('id',$value)->first();
-     });
-     
+      parent::boot();     
     }
 }

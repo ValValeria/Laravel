@@ -1,0 +1,11 @@
+export const GET_ARTICLES="GET_ARTICLES";
+export const SIGN_UP="SIGN_UP";
+export const STATUS_OF_USER="STATUS_OF_USER";
+export const LOG_OUT="LOG_OUT";
+export const ADD_POST="ADD_POST";
+export const GET_USER_POST="GET_USER_POST"
+export const GET_CSRF="GET_CSRF";
+export const CLEAR="CLEAR";
+export const LOGIN="LOGIN";
+export const GET_ARTICLE="GET_ARTICLE";
+export const SEARCH="SEARCH";

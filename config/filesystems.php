@@ -54,6 +54,12 @@ return [
             'url' => env('APP_URL').'/public',
             'visibility' => 'public',
         ],
+        'build' => [
+            'driver' => 'local',
+            'root' => base_path('vuejs/dist'),
+            'url' => env('APP_URL').'/scripts',
+            'visibility' => 'public',
+        ],
 
         's3' => [
             'driver' => 's3',

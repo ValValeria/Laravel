@@ -30,4 +30,5 @@ Route::fallback(function () {
    return response(Storage::disk('public')->get('index.html'))->header('Content-Type','text/html');
 });
 
+
 ?>

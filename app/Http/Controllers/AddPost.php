@@ -10,13 +10,16 @@ use App\Post as Post;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 
 class AddPost 
 {
     protected const imageFolder='images';
     protected $response=["errors"=>[],"messages"=>[],"status"=>''];
-
+    protected const urls=[
+      'post', 'posts','userPosts'
+    ];
   /**
    * @param  Request 
    * @return Response
@@ -74,6 +77,12 @@ class AddPost
       $newPost=Post::updateOrCreate(
         ['title'=>$request->title,"img"=>$filePathPub,"descr"=>$request->descr,"user_id"=>Auth::id()]
       );   
+      
+      $key=urlencode(self::urls[0]);
+
+      Cache::store(
+        'file'
+      )->forever($key,$newPost);
 
       $this->response['status']="Added";
       $this->response['messages'][0]=["url"=>$filePathPub];
@@ -93,13 +102,19 @@ class AddPost
     public function getPost(Request $request,string $title){
 
         $title=\urldecode($title);
-        $post=Post::where('title',$title)->get()->load('user','user');
+        $key =self::urls[0].$title;
+        $post=Cache::store('file')->get($key);
 
+        if (!$post) {
+          $post=Post::where('title',$title)->get()->load('user','user');
+        } 
+        
         if (!$post) {
             $this->response['errors'][]="The post doesn't exist";
             $this->response['status']="Not Found";
         }else {
             $this->response['messages'][0]=["posts"=>$post];
+            Cache::store('file')->rememberForever($key,$post);
         }
 
         return response(\json_encode($this->response,JSON_UNESCAPED_UNICODE));
@@ -110,16 +125,22 @@ class AddPost
    * @param  Request 
    * @return Response
    */
-   public function getPosts(Request $request){
+  public function getPosts(Request $request){
 
        $start=$request->query('start')??0;
+       $key=self::urls[1].$start;
 
-       $posts=Post::all()->slice($start,3)->load('user','user')->values();
-
+       if(Cache::store('file')->has($key)){         
+         $posts=Cache::store('file')->get($key);
+       } else{
+         $posts=Post::all()->slice($start,3)->load('user','user')->values();
+       }
+       
        if (!count($posts->toArray())) {
            $this->response['status']="Not Found";
        }else{
           $this->response['messages'][0]=["posts"=>$posts];
+          Cache::store('file')->forever($key,$posts);
        }
 
        return \json_encode($this->response,JSON_UNESCAPED_UNICODE);
@@ -130,16 +151,25 @@ class AddPost
    * @param  Request 
    * @return Response
    */
-  public function deletePost(Request $request,$postTitle){
+  public function updatePost(Request $request,$postTitle){
 
      Gate::authorize('create-post');
 
-     $post = Post::where('title',\urldecode($postTitle));
+     $key=\urldecode($postTitle);
+
+     $post = Post::where('title',$key);
 
      if(Auth::user()->can('deletePost',$post)){
 
        $this->response['status']="Added";
-       $post->update($request->all());
+
+       $updated=$post->update($request->all());
+    
+       Cache::store(
+         'file'
+       )->forget('key');
+
+       Cache::store('file')->add($key,$updated);
 
      } else {
        $this->response['errors'][]="You can't update this post";
@@ -165,6 +195,7 @@ class AddPost
     
     return \json_encode($this->response);
   }
+
 
   public function searchPosts(Request $request){
 

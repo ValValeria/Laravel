@@ -127,13 +127,7 @@ export default Vue.extend({
  max-width:400px;
  height:340px;
 }
-.gray_block{
-    background-color: rgb(240, 240, 240);
-    background-image: url(https://avocode.com/static/images/homepage/product/design-management/security.png?ver=1);
-    background-repeat: no-repeat;
-    background-position: right bottom;
-    background-size: 35%;
-}
+
 .card__wrap .card-body{
     display: flex;
     flex-direction: column;

@@ -20,6 +20,7 @@ class Data
      public function exists(string $path)
      { 
         try {
+            
             if(Storage::disk("public")->exists($path)){
                 $disk="public";
             }else if(Storage::disk("build")->exists($path)) {
@@ -33,6 +34,7 @@ class Data
             return response($content)->header(
                     'Content-Type',M::mime(pathinfo($path,PATHINFO_EXTENSION))
             );
+
         } catch (\Throwable $th) {
             echo $th->getMessage();
         }
